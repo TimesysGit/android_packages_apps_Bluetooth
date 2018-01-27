@@ -255,6 +255,14 @@
         </service>
         <service
             android:process="@string/process"
+            android:name = ".iap2.Iap2Service"
+            android:enabled="@bool/profile_supported_iap2">
+            <intent-filter>
+                <action android:name="android.bluetooth.IBluetoothIAP2" />
+            </intent-filter>
+        </service>
+        <service
+            android:process="@string/process"
             android:name = ".a2dp.A2dpService"
             android:enabled="@bool/profile_supported_a2dp">
             <intent-filter>

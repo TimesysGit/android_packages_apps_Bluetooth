@@ -33,6 +33,8 @@ JNIEnv* getCallbackEnv();
 
 int register_com_android_bluetooth_hfp(JNIEnv* env);
 
+int register_com_android_bluetooth_iap2(JNIEnv* env);
+
 int register_com_android_bluetooth_a2dp(JNIEnv* env);
 
 int register_com_android_bluetooth_avrcp(JNIEnv* env);

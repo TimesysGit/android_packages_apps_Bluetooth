@@ -50,6 +50,7 @@ import android.util.Pair;
 import com.android.bluetooth.a2dp.A2dpService;
 import com.android.bluetooth.hid.HidService;
 import com.android.bluetooth.hfp.HeadsetService;
+import com.android.bluetooth.iap2.Iap2Service;
 import com.android.bluetooth.hdp.HealthService;
 import com.android.bluetooth.pan.PanService;
 import com.android.bluetooth.R;
@@ -69,7 +70,7 @@ import android.os.ServiceManager;
 
 public class AdapterService extends Service {
     private static final String TAG = "BluetoothAdapterService";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final boolean TRACE_REF = true;
     //For Debugging only
     private static int sRefCount=0;
@@ -455,6 +456,7 @@ public class AdapterService extends Service {
             Intent intent = new Intent(this,services[i]);
             intent.putExtra(EXTRA_ACTION,ACTION_SERVICE_STATE_CHANGED);
             intent.putExtra(BluetoothAdapter.EXTRA_STATE,state);
+            Log.d(TAG, "Starting service " + intent.toString());
             startService(intent);
         }
     }
@@ -1079,6 +1081,7 @@ public class AdapterService extends Service {
             if (DBG) debugLog( "Initiate auto connection on BT on...");
              autoConnectHeadset();
              autoConnectA2dp();
+             autoConnectIap2();
          }
          else {
              if (DBG) debugLog( "BT is in Quiet mode. Not initiating  auto connections");
@@ -1096,6 +1099,21 @@ public class AdapterService extends Service {
             if (hsService.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT ){
                 Log.d(TAG,"Auto Connecting Headset Profile with device " + device.toString());
                 hsService.connect(device);
+                }
+        }
+    }
+
+     private void autoConnectIap2(){
+        Iap2Service  iap2Service = Iap2Service.getIap2Service();
+
+        BluetoothDevice bondedDevices[] = getBondedDevices();
+        if ((bondedDevices == null) ||(iap2Service == null)) {
+            return;
+        }
+        for (BluetoothDevice device : bondedDevices) {
+            if (iap2Service.getPriority(device) == BluetoothProfile.PRIORITY_AUTO_CONNECT ){
+                Log.d(TAG,"Auto Connecting IAP2 Profile with device " + device.toString());
+                iap2Service.connect(device);
                 }
         }
     }
