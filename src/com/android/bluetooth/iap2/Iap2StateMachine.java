@@ -546,6 +546,14 @@ final class Iap2StateMachine extends StateMachine {
                     if (!mCurrentDevice.equals(device)) {
                         break;
                     }
+
+                    // Service-disconnect message not currently sent up, make it up here
+                    if (getServiceState(device) == BluetoothIAP2.STATE_SERVICE_CONNECTED) {
+                        Log.w(TAG, "synthesizing a service-disconnect broadcast");
+                        broadcastServiceState(device, BluetoothIAP2.STATE_SERVICE_DISCONNECTED,
+                                              BluetoothIAP2.STATE_SERVICE_CONNECTED);
+                    }
+
                     broadcastConnectionState(device, BluetoothProfile.STATE_DISCONNECTING,
                                    BluetoothProfile.STATE_CONNECTED);
                     if (!disconnectIap2Native(getByteAddress(device))) {
