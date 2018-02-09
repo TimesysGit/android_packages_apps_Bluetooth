@@ -152,8 +152,12 @@ public class Iap2Service extends ProfileService {
         }
 
         public int getConnectionState(BluetoothDevice device) {
+			if (DBG) Log.d(TAG, "Binder getConnectionState() called");
             Iap2Service service = getService();
-            if (service == null) return BluetoothProfile.STATE_DISCONNECTED;
+            if (service == null) {
+				if (DBG) Log.d(TAG, "Binder getConnectionState() service is null");
+				return BluetoothProfile.STATE_DISCONNECTED;
+			}
             return service.getConnectionState(device);
         }
 
@@ -177,9 +181,16 @@ public class Iap2Service extends ProfileService {
         }
 
         public ParcelFileDescriptor getSocket(BluetoothDevice device) {
+			if (DBG) Log.d(TAG, "BluetoothIap2Binder getSocket() called");
             Iap2Service service = getService();
-            if (service == null) return null;
-            if (service.getConnectionState(device) != BluetoothProfile.STATE_CONNECTED) return null;
+            if (service == null) {
+				if (DBG) Log.d(TAG, "getSocket(): service is NULL");
+				return null;
+			}
+            if (service.getConnectionState(device) != BluetoothProfile.STATE_CONNECTED) {
+				if (DBG) Log.d(TAG, "getSocket(): device not connected");
+				return null;
+			}
             return service.getSocket(device);
         }
 
@@ -274,7 +285,9 @@ public class Iap2Service extends ProfileService {
     }
 
     int getConnectionState(BluetoothDevice device) {
+		if (DBG) Log.d(TAG, "getConnectionState() called");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+		if (DBG) Log.d(TAG, "getConnectionState() returning " + mStateMachine.getConnectionState(device));
         return mStateMachine.getConnectionState(device);
     }
 
@@ -302,24 +315,33 @@ public class Iap2Service extends ProfileService {
     }
 
     ParcelFileDescriptor getSocket(BluetoothDevice device) {
+		if (DBG) Log.d(TAG, "iap2 service getSocket() called");
         enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
         int connectionState = mStateMachine.getConnectionState(device);
         if (connectionState != BluetoothProfile.STATE_CONNECTED) {
+			if (DBG) Log.d(TAG, "iap2 service getSocket: device not connected");
             return null;
         }
         int serviceState = mStateMachine.getServiceState(device);
         if (serviceState != BluetoothIAP2.STATE_SERVICE_CONNECTED) {
+			if (DBG) Log.d(TAG, "iap2 service getSocket: service not connected");
             return null;
         }
-        // ALK - implement
+
         FileDescriptor fd = mStateMachine.getFd();
-        if (fd == null)
+        if (fd == null) {
+			if (DBG) Log.d(TAG, "unable to get file descriptor");
             return null;
+		}
         ParcelFileDescriptor pfd = null;
         try {
             // create a dup of the original file descriptor
             pfd = ParcelFileDescriptor.dup(fd);
+            if (pfd == null) {
+                Log.e(TAG, "unable to dup file descriptor");
+            }
         } catch (IOException e) {
+			Log.e(TAG, "excepion on dup file descriptor " + e.getMessage());
             return null;
         }
         return pfd;
